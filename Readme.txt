@@ -13,7 +13,9 @@ Date	:	26 July 2012
 OpenCV 2.* needs to be installed on the system.
 Distribuions Supported: Linux
 
-Note: Please Change the path for the cascade on line 51 to where you have installed it.Mine was a default installation.This path 	should work on most systems.Code edited and the xml file is provided with the package.this will not be a problem anymore I 	guess.
+Note:	Please Change the path for the cascade on line 51 to where you have installed it.
+	Mine was a default installation.This path should work on most systems.
+	Code edited and the xml file is provided with the package.This will not be a problem anymore I 	guess.
 
 #### Compile ####
 
