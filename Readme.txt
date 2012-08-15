@@ -19,12 +19,12 @@ Note:	Please Change the path for the cascade on line 51 to where you have instal
 
 #### Compile ####
 
-g++ `pkg-config --cflags opencv` haar_mftrack.cpp -o haar_mf `pkg-config --libs opencv`
+g++ `pkg-config --cflags opencv` multi_face_tracking.cpp -o multi_face `pkg-config --libs opencv`
 
 
 #### Run ####
 
-./haar_mf
+./multi_face
 
 The initial Red box is the output of Haar Cascade.
 Press Spacebar to Run the Median Flow Tracker part of the code.
