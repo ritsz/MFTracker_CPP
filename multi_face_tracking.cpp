@@ -61,6 +61,8 @@ double bbox1_x,bbox1_y,bbox2_y,bbox2_x,bbox_x,bbox_y;
 double bbox1_width,bbox1_height,bbox2_width,bbox2_height,bbox_width,bbox_height;
 double xmean = 0;
 double ymean = 0;
+float median;
+bool fast = false;
 
 /* -------------------------CODE-----------------------------*/
 
@@ -112,7 +114,7 @@ void ncc_filter(IplImage *frame1, IplImage *frame2, CvPoint2D32f *prev_feat, CvP
 	}
 	vector<float> err_copy (ncc_err);
 	sort(ncc_err.begin(), ncc_err.end());
-	double median = (ncc_err[filt]+ncc_err[filt-1])/2.;
+	median = (ncc_err[filt]+ncc_err[filt-1])/2.;
 	for(int i = 0; i < npoin; i++) {
 		if (err_copy[i] > median) {
 			ncc_pass[i] = 1;		
@@ -199,6 +201,8 @@ int main( int argc,char** argv)
 	
 	
 	CvPoint pta,ptb;
+	pta.x = 0;
+	pta.y = 0;
 	int i;
 	cvClearMemStorage(storage);	
 	cvNamedWindow("Results",CV_WINDOW_AUTOSIZE);
@@ -227,7 +231,8 @@ int main( int argc,char** argv)
 			 
 		}
 		
-		
+		if(pta.x!=0 && pta.y!=0) break;
+		if(fast) break;
 		
 		cvShowImage("Results",displayed_image);
 				
@@ -322,14 +327,14 @@ int main( int argc,char** argv)
 		
 		for(int i = 0; i<npoints;i++)
 		{
-			if(fb_pass[i] && ncc_pass[i])
+			if(fb_pass[i] && ncc_pass[i] && (frame2_features[i].x>bbox_x) && (frame2_features[i].y>bbox_y) && (frame2_features[i].x < bbox_x + bbox_width ) && (frame2_features[i].y < bbox_y +bbox_height) )
 			{
 				pcount++;
 			}
 		}
 		
-		fprintf(stderr,"Passed Points %d\t",pcount);
-		
+		fprintf(stderr,"Passed Points %d ### %f\t",pcount , median);
+		if((median)<0.37 ) {goto detect; }		
 		if(pcount == 0) {  fprintf(stderr," No point tracked currently: DETECTING AGAIN"); pta.x = 0; pta.y = 0;goto detect;  } // If no points detected, run haar again
 		
 		vector<CvPoint2D32f> curr_features2(pcount),prev_features2(pcount);
@@ -337,7 +342,7 @@ int main( int argc,char** argv)
 		
 		for( int i = 0; i< npoints; i++)
 		{
-			if(fb_pass[i] && ncc_pass[i])
+			if(fb_pass[i] && ncc_pass[i] && (frame2_features[i].x>bbox_x) && (frame2_features[i].y>bbox_y) && (frame2_features[i].x < bbox_x + bbox_width ) && (frame2_features[i].y < bbox_y +bbox_height) )
 			{
 				curr_features2[j] = frame2_features[i];
 				prev_features2[j] = frame1_features[i];
@@ -527,7 +532,8 @@ cvReleaseCapture(&capture);
 		}
 		
 		fprintf(stderr,"Passed Points %d\t",pcount);
-		
+		if(median < 0.37 ) {fast = true; goto detect; }		
+
 		if(pcount == 0) {  fprintf(stderr," No point tracked currently: DETECTING AGAIN");pta.x = 0; pta.y = 0; goto detect; } // If no points detected, run haar again
 		
 		vector<CvPoint2D32f> curr_features1(pcount),prev_features1(pcount);
@@ -627,6 +633,8 @@ cvReleaseCapture(&capture);
 		}
 		
 		if(pcount == 0) {  fprintf(stderr," No point tracked currently: DETECTING AGAIN");pta.x = 0; pta.y = 0; goto detect; } // If no points detected, run haar again
+
+		if(median < 0.37 ) {fast = true; goto detect; }
 		
 		vector<CvPoint2D32f> curr_features2(pcount),prev_features2(pcount);
 		int r = 0;
